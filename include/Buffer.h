@@ -5,30 +5,11 @@
 #include <Windows.h>
 #include <gl/glew.h>
 
+#include <gl/GL.h>	// I don't think this includes anything that glew doesn't already
 #include "..\src\glid.hpp"
 
 namespace gldr
 {
-	namespace detail
-	{
-		struct BufferID
-		{
-			static GLuint create()
-			{
-				GLuint id;
-				glGenBuffers(1, &id);
-
-				return id;
-			}
-
-			static void destroy(GLuint& id)
-			{
-				glDeleteBuffers(1, &id);
-				id = 0;
-			}
-		};
-	}
-
 	enum BufferType
 	{
 		ARRAY_BUFFER = GL_ARRAY_BUFFER,
@@ -107,6 +88,20 @@ namespace gldr
 			return type_;
 		}
 
+		static GLuint create()
+		{
+			GLuint id;
+			glGenBuffers(1, &id);
+
+			return id;
+		}
+
+		static void destroy(GLuint& id)
+		{
+			glDeleteBuffers(1, &id);
+			id = 0;
+		}
+
 	private:
 		// Disallow 
 		Buffer();
@@ -129,7 +124,7 @@ namespace gldr
 			return sizeof(U);
 		}
 
-		Glid<detail::BufferID> id_;
+		Glid<Buffer> id_;
 		BufferType type_;
 		BufferUsageType usage_;
 		GLuint numElements_;
