@@ -4,8 +4,6 @@
 #include <functional>
 #include <Windows.h>
 #include <gl/glew.h>
-
-#include <gl/GL.h>	// I don't think this includes anything that glew doesn't already
 #include "..\src\glid.hpp"
 
 namespace gldr
@@ -103,9 +101,6 @@ namespace gldr
 		}
 
 	private:
-		// Disallow 
-		Buffer();
-
 		template<typename T, typename U>
 		static size_t offsetOfMember(U T::* member)
 		{
