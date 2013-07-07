@@ -1,59 +1,58 @@
 #pragma once
 
-#include "ResourceID.h"
-#include "Shader.h"
-#include "Utils.h"
-
 #include <cassert>
 #include <functional>
 #include <Windows.h>
 #include <gl/glew.h>
 
-class ShaderProgramID: public ResourceID<GLuint, std::function<void()>>
-{
-public:
-	ShaderProgramID(): ResourceID(0, [&](){ glDeleteShader(id_); })
-	{
-		id_ = glCreateProgram();
-	}
-};
+#include "Shader.h"
+#include "Utils.h"
 
-class ShaderProgram
-{
-public:
-	ShaderProgram(): id_()
-	{
-	}
+#include "..\src\glid.hpp"
 
-	void attachShader(Shader& shader)
-	{
-		glAttachShader(id_.get(), shader.id_.get());
-	}
+namespace gldr {
+	class ShaderProgram {
+	public:
+		ShaderProgram(): id() { }
 
-	void bindAttribute(size_t attribIndex, std::string attribute)
-	{
-		glBindAttribLocation(id_.get(), attribIndex, attribute.c_str());
-	}
+		template<ShaderType type>
+		void attachShader(Shader<type>& shader) {
+			glAttachShader(static_cast<GLuint>(id), static_cast<GLuint>(shader.id));
+		}
 
-	void link()
-	{
-		glLinkProgram(id_.get());
+		void bindAttribute(size_t attribIndex, std::string attribute) {
+			glBindAttribLocation(static_cast<GLuint>(id), attribIndex, attribute.c_str());
+		}
 
-		GLint isLinked;
-		glGetProgramiv(id_.get(), GL_LINK_STATUS, &isLinked);
-		assert(isLinked == GL_TRUE);
-	}
+		void link() {
+			glLinkProgram(static_cast<GLuint>(id));
 
-	GLuint getUniformLocation(std::string uniformName)
-	{
-		return glGetUniformLocation(id_.get(), uniformName.c_str());
-	}
+			GLint isLinked;
+			glGetProgramiv(static_cast<GLuint>(id), GL_LINK_STATUS, &isLinked);
+			assert(isLinked == GL_TRUE);
+		}
 
-	void Use()
-	{
-		glUseProgram(id_.get());
-	}
+		GLuint getUniformLocation(std::string uniformName) {
+			return glGetUniformLocation(static_cast<GLuint>(id), uniformName.c_str());
+		}
 
-private:
-	ShaderProgramID id_;
-};
+		void use() {
+			glUseProgram(static_cast<GLuint>(id));
+		}
+
+		static GLuint create() {
+			GLuint id;
+			id = glCreateProgram();
+
+			return id;
+		}
+
+		static void destroy(GLuint& id) {
+			glDeleteProgram(id);
+			id = 0;
+		}
+
+	private:
+		Glid<ShaderProgram> id;
+	};
+}

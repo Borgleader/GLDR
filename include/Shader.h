@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ResourceID.h"
 #include "Utils.h"
 
 #include <cassert>
@@ -8,42 +7,46 @@
 #include <Windows.h>
 #include <gl/glew.h>
 
-enum ShaderType
-{
-	GLDR_VERT_SHADER = GL_VERTEX_SHADER,
-	GLDR_GEOM_SHADER = GL_GEOMETRY_SHADER,
-	GLDR_FRAG_SHADER = GL_FRAGMENT_SHADER,
-};
+#include "..\src\glid.hpp"
 
-class ShaderID: public ResourceID<GLuint, std::function<void()>>
-{
-public:
-	ShaderID(ShaderType type): ResourceID(0, [&](){ glDeleteBuffers(1, &id_); })
-	{
-		id_ = glCreateShader(type);
-	}
-};
+namespace gldr {
+	enum class ShaderType : GLuint {
+		GLDR_VERT_SHADER = GL_VERTEX_SHADER,
+		GLDR_GEOM_SHADER = GL_GEOMETRY_SHADER,
+		GLDR_FRAG_SHADER = GL_FRAGMENT_SHADER,
+	};
 
-class Shader
-{
-	friend class ShaderProgram;
-public:
-	Shader(ShaderType type, std::string filepath): id_(type), type_(type)
-	{
-		std::string shaderContent(loadFileContent<std::string>(filepath));
-		assert(!shaderContent.empty());
+	template<ShaderType type>
+	class Shader {
+	public:
+		Shader(ShaderType type, std::string filepath): id() {
+			std::string shaderContent(loadFileContent<std::string>(filepath));
+			assert(!shaderContent.empty());
 
-		int length = shaderContent.length();
-		const char* shaderString = shaderContent.c_str();
-		glShaderSource(id_.get(), 1, &shaderString, &length);
-		glCompileShader(id_.get());
+			int length = shaderContent.length();
+			const char* shaderString = shaderContent.c_str();
+			glShaderSource(static_cast<GLuint>(id), 1, &shaderString, &length);
+			glCompileShader(static_cast<GLuint>(id));
 
-		GLint compiled;
-		glGetShaderiv(id_.get(), GL_COMPILE_STATUS, &compiled);
-		assert(compiled == GL_TRUE);
-	}
+			GLint compiled;
+			glGetShaderiv(static_cast<GLuint>(id), GL_COMPILE_STATUS, &compiled);
+			assert(compiled == GL_TRUE);
+		}
 
-private:
-	ShaderID id_;
-	ShaderType type_;
-};
+		static GLuint create() {
+			GLuint id;
+			id = glCreateShader(type);
+
+			return id;
+		}
+
+		static void destroy(GLuint& id) {
+			glDeleteShader(id);
+			id = 0;
+		}
+
+	private:
+		Glid<Shader> id;
+		friend class ShaderProgram;
+	};
+}

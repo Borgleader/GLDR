@@ -4,12 +4,11 @@
 #include <functional>
 #include <Windows.h>
 #include <gl/glew.h>
+
 #include "..\src\glid.hpp"
 
-namespace gldr
-{
-	enum BufferType
-	{
+namespace gldr {
+	enum class BufferType : GLuint {
 		ARRAY_BUFFER = GL_ARRAY_BUFFER,
 		ATOMIC_COUNTER_BUFFER = GL_ATOMIC_COUNTER_BUFFER,
 		COPY_READ_BUFFER = GL_COPY_READ_BUFFER,
@@ -25,8 +24,7 @@ namespace gldr
 		UNIFORM_BUFFER = GL_UNIFORM_BUFFER,
 	};
 
-	enum BufferUsageType
-	{
+	enum class BufferUsageType : GLuint {
 		DYNAMIC_COPY = GL_DYNAMIC_COPY,
 		DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
 		DYNAMIC_READ = GL_DYNAMIC_READ,
@@ -38,8 +36,7 @@ namespace gldr
 		STREAM_READ = GL_STREAM_READ,
 	};
 
-	enum BufferAttribType
-	{
+	enum class BufferAttribType : GLuint {
 		BYTE_ATTRIB = GL_BYTE,
 		DOUBLE_ATTRIB = GL_DOUBLE,
 		FLOAT_ATTRIB = GL_FLOAT,
@@ -50,80 +47,70 @@ namespace gldr
 		USHORT_ATTRIB = GL_UNSIGNED_SHORT,
 	};
 
-	class Buffer
-	{
+	class Buffer {
 	public:
-		Buffer(BufferType type, BufferUsageType usage, GLuint size, GLuint stride, const void* data): 
-			id_(), type_(type), usage_(usage), numElements_(size/stride), stride_(stride), size_(size)
+		Buffer(BufferType bufType, BufferUsageType bufUsage, GLuint bufSize, GLuint bufStride, const void* bufData): 
+			id(), type(bufType), usage(bufUsage), numElements(bufSize/bufStride), stride(bufStride), size(bufSize) 
 		{
 			// Make sure the size is a multiple of stride
-			assert((size_/stride_)*stride_ == size_);
+			assert((size/stride)*stride == size);
 
-			glBindBuffer(type_, GLuint(id_));
-			glBufferData(type_, size_, data, usage_);
+			glBindBuffer(static_cast<GLuint>(type), GLuint(id));
+			glBufferData(static_cast<GLuint>(type), size, bufData, static_cast<GLuint>(usage));
 		}
 
 		template<typename T, typename U>
-		void enableAttribute(size_t attribIndex, U T::* member, BufferAttribType attribType, GLboolean isNormalized)
-		{
+		void enableAttribute(size_t attribIndex, U T::* member, BufferAttribType attribType, GLboolean isNormalized) {
 			enableAttribute(attribIndex, sizeof(U)/sizeofmember(member), attribType, isNormalized, sizeof(T), offsetOfMember<T, U>(member));
 		}
 
-		void enableAttribute(size_t attribIndex, size_t size, BufferAttribType attribType, GLboolean isNormalized, size_t stride, size_t offset)
-		{
-			glBindBuffer(type_,  GLuint(id_));
-			glVertexAttribPointer(attribIndex, size, attribType, isNormalized, stride, (void*)offset);
+		void enableAttribute(size_t attribIndex, size_t size, BufferAttribType attribType, GLboolean isNormalized, size_t stride, size_t offset) {
+			glBindBuffer(static_cast<GLuint>(type),  GLuint(id));
+			glVertexAttribPointer(attribIndex, size, static_cast<GLuint>(attribType), isNormalized, stride, (void*)offset);
 			glEnableVertexAttribArray(attribIndex);
 		}
 
-		size_t getCount()
-		{
-			return numElements_;
+		size_t getElementCount() {
+			return numElements;
 		}
 
-		BufferType getType()
-		{
-			return type_;
+		BufferType getType() {
+			return type;
 		}
 
-		static GLuint create()
-		{
+		static GLuint create() {
 			GLuint id;
 			glGenBuffers(1, &id);
 
 			return id;
 		}
 
-		static void destroy(GLuint& id)
-		{
+		static void destroy(GLuint& id) {
 			glDeleteBuffers(1, &id);
 			id = 0;
 		}
 
 	private:
 		template<typename T, typename U>
-		static size_t offsetOfMember(U T::* member)
-		{
+		static size_t offsetOfMember(U T::* member) {
 			return static_cast<size_t>(reinterpret_cast<const volatile char&>(member));
 		}
 
 		template<typename U>
-		static size_t sizeofmember(U* member)
-		{
+		static size_t sizeofmember(U* member) {
 			return sizeof(U);
 		}
 
 		template<typename U>
-		static size_t sizeofmember(U member)
-		{
+		static size_t sizeofmember(U member) {
 			return sizeof(U);
 		}
 
-		Glid<Buffer> id_;
-		BufferType type_;
-		BufferUsageType usage_;
-		GLuint numElements_;
-		GLuint stride_;
-		GLuint size_;
+		Glid<Buffer> id;
+		BufferType type;
+		BufferUsageType usage;
+		GLuint numElements;
+		GLuint stride;
+		GLuint size;
 	};
 }

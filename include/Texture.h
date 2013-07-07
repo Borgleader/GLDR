@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ResourceID.h"
-
 #include <cassert>
 #include <functional>
 #include <memory>
@@ -10,81 +8,85 @@
 #include <gl/glew.h>
 #include <webp/decode.h>
 
-enum WrappingOption
-{
-	GLDR_CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE, 
-	GLDR_MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
-	GLDR_REPEAT = GL_REPEAT,
-};
+#include "..\src\glid.hpp"
 
-enum FilteringOption
-{
-	GLDR_NEAREST = GL_NEAREST,
-	GLDR_LINEAR = GL_LINEAR,
-};
-
-class TextureID: public ResourceID<GLuint, std::function<void()>>
-{
-public:
-	TextureID(): ResourceID(0, [&](){ glDeleteTextures(1, &id_); })
+namespace gldr {
+	enum class WrappingOption : GLuint
 	{
-		glGenTextures(1, &id_);
-	}
-};
+		GLDR_CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE, 
+		GLDR_MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
+		GLDR_REPEAT = GL_REPEAT,
+	};
 
-class Texture
-{
-public:
-	Texture(): id_(), width_(0), height_(0), pixels_(nullptr)
+	enum class FilteringOption : GLuint
 	{
-	}
+		GLDR_NEAREST = GL_NEAREST,
+		GLDR_LINEAR = GL_LINEAR,
+	};
 
-	Texture(std::string filename, WrappingOption wrapping = GLDR_CLAMP_TO_EDGE, FilteringOption filtering = GLDR_NEAREST): 
-		id_(), width_(0), height_(0), pixels_(nullptr)
+	class Texture
 	{
-		// Load and decode image data
-		std::vector<char> rawData(loadFileContent<std::vector<char>>(filename));
-		pixels_.reset(WebPDecodeRGBA(reinterpret_cast<unsigned char*>(rawData.data()), rawData.size(), &width_, &height_));
+	public:
+		Texture(): id(), width(0), height(0), pixels(nullptr)
+		{
+		}
 
-		// Set texture parameters and data
-		glBindTexture(GL_TEXTURE_2D, id_.get());
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapping);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapping);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels_.get());
-		glBindTexture(GL_TEXTURE_2D, 0);
+		Texture(std::string filename, WrappingOption wrapping = WrappingOption::GLDR_CLAMP_TO_EDGE, FilteringOption filtering = FilteringOption::GLDR_NEAREST): 
+			id(), width(0), height(0), pixels(nullptr) 
+		{
+			// Load and decode image data
+			std::vector<char> rawData(loadFileContent<std::vector<char>>(filename));
+			pixels.reset(WebPDecodeRGBA(reinterpret_cast<unsigned char*>(rawData.data()), rawData.size(), &width, &height));
 
-		assert(pixels_.get() != nullptr);
-	}
+			// Set texture parameters and data
+			glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(id));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<GLuint>(wrapping));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, static_cast<GLuint>(wrapping));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, static_cast<GLuint>(filtering));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, static_cast<GLuint>(filtering));
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels.get());
+			glBindTexture(GL_TEXTURE_2D, 0);
 
-	Texture& operator=(Texture&& other)
-	{
-		id_ = other.id_;
-		width_ = other.width_;
-		height_ = other.height_;
-		pixels_ = std::move(other.pixels_);
+			assert(pixels.get() != nullptr);
+		}
 
-		other.width_ = 0;
-		other.height_ = 0;
-		other.pixels_.release();
+		Texture& operator=(Texture&& other) {
+			id = other.id;
+			width = other.width;
+			height = other.height;
+			pixels = std::move(other.pixels);
 
-		return *this;
-	}
+			other.width = 0;
+			other.height = 0;
+			other.pixels.release();
 
-	void bind()
-	{
-		glBindTexture(GL_TEXTURE_2D, id_.get());
-	}
+			return *this;
+		}
 
-	void unbind()
-	{
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
+		void bind() {
+			glBindTexture(GL_TEXTURE_2D, id);
+		}
 
-private:
-	TextureID id_;
-	int width_;
-	int height_;
-	std::unique_ptr<uint8_t> pixels_;
-};
+		void unbind() {
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+
+		static GLuint create() {
+			GLuint id;
+			glGenTextures(1, &id);
+
+			return id;
+		}
+
+		static void destroy(GLuint& id) {
+			glDeleteTextures(1, &id);
+			id = 0;
+		}
+
+	private:
+		Glid<Texture> id;
+		int width;
+		int height;
+		std::unique_ptr<uint8_t> pixels;
+	};
+}
