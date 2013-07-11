@@ -34,7 +34,7 @@ namespace gldr {
 			pixels.reset(WebPDecodeRGBA(reinterpret_cast<unsigned char*>(rawData.data()), rawData.size(), &width, &height));
 
 			// Set texture parameters and data
-			glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(id));
+			glBindTexture(GL_TEXTURE_2D, id.get());
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<GLuint>(wrapping));
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, static_cast<GLuint>(wrapping));
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, static_cast<GLuint>(filtering));
@@ -59,7 +59,7 @@ namespace gldr {
 		}
 
 		void bind() {
-			glBindTexture(GL_TEXTURE_2D, id);
+			glBindTexture(GL_TEXTURE_2D, id.get());
 		}
 
 		void unbind() {

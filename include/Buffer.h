@@ -55,7 +55,7 @@ namespace gldr {
 			// Make sure the size is a multiple of stride
 			assert((size/stride)*stride == size);
 
-			glBindBuffer(static_cast<GLuint>(type), GLuint(id));
+			glBindBuffer(static_cast<GLuint>(type), id.get());
 			glBufferData(static_cast<GLuint>(type), size, bufData, static_cast<GLuint>(usage));
 		}
 
@@ -65,7 +65,7 @@ namespace gldr {
 		}
 
 		void enableAttribute(size_t attribIndex, size_t size, BufferAttribType attribType, GLboolean isNormalized, size_t stride, size_t offset) {
-			glBindBuffer(static_cast<GLuint>(type),  GLuint(id));
+			glBindBuffer(static_cast<GLuint>(type),  id.get());
 			glVertexAttribPointer(attribIndex, size, static_cast<GLuint>(attribType), isNormalized, stride, (void*)offset);
 			glEnableVertexAttribArray(attribIndex);
 		}

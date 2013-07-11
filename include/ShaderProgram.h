@@ -17,27 +17,27 @@ namespace gldr {
 
 		template<ShaderType type>
 		void attachShader(Shader<type>& shader) {
-			glAttachShader(static_cast<GLuint>(id), static_cast<GLuint>(shader.id));
+			glAttachShader(id.get(), shader.id.get());
 		}
 
 		void bindAttribute(size_t attribIndex, std::string attribute) {
-			glBindAttribLocation(static_cast<GLuint>(id), attribIndex, attribute.c_str());
+			glBindAttribLocation(id.get(), attribIndex, attribute.c_str());
 		}
 
 		void link() {
-			glLinkProgram(static_cast<GLuint>(id));
+			glLinkProgram(id.get());
 
 			GLint isLinked;
-			glGetProgramiv(static_cast<GLuint>(id), GL_LINK_STATUS, &isLinked);
+			glGetProgramiv(id.get(), GL_LINK_STATUS, &isLinked);
 			assert(isLinked == GL_TRUE);
 		}
 
 		GLuint getUniformLocation(std::string uniformName) {
-			return glGetUniformLocation(static_cast<GLuint>(id), uniformName.c_str());
+			return glGetUniformLocation(id.get(), uniformName.c_str());
 		}
 
 		void use() {
-			glUseProgram(static_cast<GLuint>(id));
+			glUseProgram(id.get());
 		}
 
 		void unuse() {

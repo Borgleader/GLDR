@@ -25,11 +25,11 @@ namespace gldr {
 
 			int length = shaderContent.length();
 			const char* shaderString = shaderContent.c_str();
-			glShaderSource(static_cast<GLuint>(id), 1, &shaderString, &length);
-			glCompileShader(static_cast<GLuint>(id));
+			glShaderSource(id.get(), 1, &shaderString, &length);
+			glCompileShader(id.get());
 
 			GLint compiled;
-			glGetShaderiv(static_cast<GLuint>(id), GL_COMPILE_STATUS, &compiled);
+			glGetShaderiv(id.get(), GL_COMPILE_STATUS, &compiled);
 			assert(compiled == GL_TRUE);
 		}
 

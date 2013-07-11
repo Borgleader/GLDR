@@ -29,7 +29,7 @@ namespace gldr {
 
 		void drawElements(size_t count, bool indexed = false) {
 			glEnableClientState(GL_VERTEX_ARRAY);
-			glBindVertexArray(static_cast<GLuint>(id));
+			glBindVertexArray(id.get());
 
 			if(indexed) {
 				glDrawElements(static_cast<GLuint>(mode), count, GL_UNSIGNED_BYTE, (void*)0);
@@ -42,7 +42,7 @@ namespace gldr {
 		}
 
 		void bind() {
-			glBindVertexArray(static_cast<GLuint>(id));
+			glBindVertexArray(id.get());
 		}
 
 		void unbind() {
