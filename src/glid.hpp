@@ -1,5 +1,4 @@
 #pragma once
-
 namespace gldr {
 
     /*
@@ -31,8 +30,7 @@ public:
         return *this;
     }
 
-    //explicit operator GLuint() const{
-	operator GLuint() const {	// MSVC doesn't support explicit conversion operators
+    GLuint get() const{
         return id;
     }
 
