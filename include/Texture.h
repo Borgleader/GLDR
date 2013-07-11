@@ -11,25 +11,20 @@
 #include "..\src\glid.hpp"
 
 namespace gldr {
-	enum class WrappingOption : GLuint
-	{
+	enum class WrappingOption : GLuint {
 		GLDR_CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE, 
 		GLDR_MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
 		GLDR_REPEAT = GL_REPEAT,
 	};
 
-	enum class FilteringOption : GLuint
-	{
+	enum class FilteringOption : GLuint {
 		GLDR_NEAREST = GL_NEAREST,
 		GLDR_LINEAR = GL_LINEAR,
 	};
 
-	class Texture
-	{
+	class Texture {
 	public:
-		Texture(): id(), width(0), height(0), pixels(nullptr)
-		{
-		}
+		Texture(): id(), width(0), height(0), pixels(nullptr) { }
 
 		Texture(std::string filename, WrappingOption wrapping = WrappingOption::GLDR_CLAMP_TO_EDGE, FilteringOption filtering = FilteringOption::GLDR_NEAREST): 
 			id(), width(0), height(0), pixels(nullptr) 
@@ -51,7 +46,7 @@ namespace gldr {
 		}
 
 		Texture& operator=(Texture&& other) {
-			id = other.id;
+			id = std::move(other.id);
 			width = other.width;
 			height = other.height;
 			pixels = std::move(other.pixels);

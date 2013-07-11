@@ -19,7 +19,7 @@ namespace gldr {
 	template<ShaderType type>
 	class Shader {
 	public:
-		Shader(ShaderType type, std::string filepath): id() {
+		Shader(std::string filepath): id() {
 			std::string shaderContent(loadFileContent<std::string>(filepath));
 			assert(!shaderContent.empty());
 
@@ -35,7 +35,7 @@ namespace gldr {
 
 		static GLuint create() {
 			GLuint id;
-			id = glCreateShader(type);
+			id = glCreateShader(static_cast<GLuint>(type));
 
 			return id;
 		}

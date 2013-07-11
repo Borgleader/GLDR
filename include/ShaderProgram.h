@@ -40,6 +40,10 @@ namespace gldr {
 			glUseProgram(static_cast<GLuint>(id));
 		}
 
+		void unuse() {
+			glUseProgram(0);
+		}
+
 		static GLuint create() {
 			GLuint id;
 			id = glCreateProgram();
